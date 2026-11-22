@@ -259,7 +259,7 @@ export default function HomePage() {
                       (chamber) => chamber.district === district
                     );
 
-                    const firstChamber = chambers[0];
+                    
                     const profileUrl =
                       `/doctors/${encodeURIComponent(doctor.id)}`;
 
@@ -297,40 +297,7 @@ export default function HomePage() {
                           </div>
                         </div>
 
-                        {firstChamber && (
-                          <div className="mt-4 border-t border-[#edf1ee] pt-3">
-                            <p className="break-words text-sm font-medium">
-                              {firstChamber.name}
-                            </p>
-
-                            <p className="mt-1 text-sm text-[#66766e]">
-                              {[firstChamber.area, firstChamber.district]
-                                .filter(Boolean)
-                                .join(", ")}
-                            </p>
-
-                            {firstChamber.schedule && (
-                              <p className="mt-2 break-words text-sm leading-6">
-                                {firstChamber.schedule}
-                              </p>
-                            )}
-
-                            {firstChamber.fee !== null &&
-                              firstChamber.fee !== undefined &&
-                              firstChamber.fee !== "" && (
-                                <p className="mt-2 text-sm">
-                                  ভিজিট: ৳ {firstChamber.fee}
-                                </p>
-                              )}
-
-                            {chambers.length > 1 && (
-                              <p className="mt-2 text-sm text-[#66766e]">
-                                এই জেলায় আরও {chambers.length - 1}টি চেম্বার
-                              </p>
-                            )}
-                          </div>
-                        )}
-
+                        
                         <Link
                           href={profileUrl}
                           className="mt-4 flex min-h-11 items-center justify-center rounded-xl bg-[#edf6f1] px-4 py-3 text-sm font-semibold text-[#16735d] hover:bg-[#e0f0e7]"
@@ -353,23 +320,7 @@ export default function HomePage() {
           )}
         </section>
 
-        <footer className="mt-8 border-t border-[#edf1ee] py-5 text-sm text-[#66766e]">
-          <p className="leading-6">
-            যাওয়ার আগে চেম্বারে যোগাযোগ করে সময় ও ফি নিশ্চিত করুন।
-          </p>
-
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-3">
-            <Link href="/about" className="hover:underline">
-              আমাদের সম্পর্কে
-            </Link>
-            <Link href="/contact" className="hover:underline">
-              যোগাযোগ
-            </Link>
-            <Link href="/privacy" className="hover:underline">
-              গোপনীয়তা
-            </Link>
-          </div>
-        </footer>
+        
       </div>
     </main>
   );
