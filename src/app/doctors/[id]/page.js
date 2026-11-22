@@ -1,12 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { doc, getDocFromServer } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import SaveDoctorButton from "@/components/SaveDoctorButton";
-import ChamberMapLink from "@/components/ChamberMapLink";
 import DoctorPhoto from "@/components/DoctorPhoto";
+import SaveDoctorButton from "@/components/SaveDoctorButton";
 
 function getPhoneLink(value) {
   const normalized = String(value || "")
@@ -18,9 +18,34 @@ function getPhoneLink(value) {
     : null;
 }
 
+function getMapLink(chamber) {
+  const address = [
+    chamber.name,
+    chamber.address,
+    chamber.area,
+    chamber.district,
+    "Bangladesh",
+  ]
+    .filter((value) => typeof value === "string" && value.trim())
+    .map((value) => value.trim());
+
+  if (!chamber.district) return null;
+
+  return (
+    "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent([...new Set(address)].join(", "))
+  );
+}
+
 export default function DoctorProfilePage() {
   return (
-    <Suspense fallback={<p className="p-8">প্রোফাইল আসছে…</p>}>
+    <Suspense
+      fallback={
+        <p className="bg-white p-6 text-[#203c30]">
+          প্রোফাইল আসছে…
+        </p>
+      }
+    >
       <DoctorProfileContent />
     </Suspense>
   );
@@ -33,6 +58,9 @@ function DoctorProfileContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  const [sharing, setSharing] = useState(false);
+  const [shareMessage, setShareMessage] = useState("");
+  const [shareLink, setShareLink] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -41,9 +69,13 @@ function DoctorProfileContent() {
       setLoading(true);
       setDoctor(null);
       setError("");
+      setShareMessage("");
+      setShareLink("");
 
       try {
-        const snapshot = await getDocFromServer(doc(db, "doctors", id));
+        const snapshot = await getDocFromServer(
+          doc(db, "doctors", id)
+        );
 
         if (!active) return;
 
@@ -59,14 +91,11 @@ function DoctorProfileContent() {
       } catch (err) {
         if (!active) return;
 
-        if (
-          err.code === "permission-denied" ||
-          err.code === "not-found"
-        ) {
-          setError("প্রোফাইলটি পাওয়া যায়নি অথবা এখন প্রকাশিত নেই।");
-        } else {
-          setError("তথ্য আনা যায়নি। ইন্টারনেট পরীক্ষা করে আবার চেষ্টা করুন।");
-        }
+        setError(
+          err.code === "permission-denied" || err.code === "not-found"
+            ? "প্রোফাইলটি পাওয়া যায়নি অথবা এখন প্রকাশিত নেই।"
+            : "তথ্য আনা যায়নি। আবার চেষ্টা করুন।"
+        );
       } finally {
         if (active) setLoading(false);
       }
@@ -79,118 +108,181 @@ function DoctorProfileContent() {
     };
   }, [id, retry]);
 
+  async function handleShare() {
+    if (sharing || !doctor) return;
+
+    setSharing(true);
+    setShareMessage("");
+    setShareLink("");
+
+    const url = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${doctor.name} | Docly`,
+          url,
+        });
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        setShareMessage("প্রোফাইলের লিংক কপি হয়েছে।");
+      } else {
+        setShareLink(url);
+        setShareMessage("নিচের লিংকটি কপি করে পাঠাতে পারেন।");
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        setShareLink(url);
+        setShareMessage("নিচের লিংকটি কপি করে পাঠাতে পারেন।");
+      }
+    } finally {
+      setSharing(false);
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-[#f3f7f2] px-5 py-8 text-[#234737]">
-      <div className="mx-auto max-w-4xl">
-        <a href="/" className="text-[#16735d] underline">
-          হোমে ফিরুন
-        </a>
+    <main className="min-h-screen bg-white px-4 py-4 text-[#203c30] sm:px-6">
+      <div className="mx-auto max-w-3xl">
+        <header className="flex flex-wrap items-start justify-between gap-2 border-b border-[#edf1ee] pb-4">
+          <Link
+            href="/"
+            className="flex min-h-12 items-center px-2 text-sm font-medium text-[#16735d]"
+          >
+            হোমে ফিরুন
+          </Link>
+
+          {!loading && doctor && (
+            <div className="flex flex-wrap items-start gap-2">
+              <SaveDoctorButton doctorId={id} compact />
+
+              <button
+                type="button"
+                onClick={handleShare}
+                disabled={sharing}
+                className="min-h-12 rounded-xl border border-[#d7e1db] px-4 py-3 text-sm text-[#203c30] disabled:opacity-50"
+              >
+                {sharing ? "অপেক্ষা…" : "শেয়ার"}
+              </button>
+            </div>
+          )}
+        </header>
+
+        {shareMessage && (
+          <p role="status" className="mt-3 text-sm text-[#16735d]">
+            {shareMessage}
+          </p>
+        )}
+
+        {shareLink && (
+          <label className="mt-3 block text-sm">
+            প্রোফাইলের লিংক
+            <input
+              readOnly
+              value={shareLink}
+              onFocus={(event) => event.target.select()}
+              className="mt-2 w-full rounded-xl border border-[#d7e1db] p-3 text-base"
+            />
+          </label>
+        )}
 
         {loading ? (
-          <p role="status" className="mt-8">প্রোফাইল আসছে…</p>
+          <p role="status" className="py-8 text-[#66766e]">
+            প্রোফাইল আসছে…
+          </p>
         ) : error ? (
-          <section className="mt-6 rounded-2xl bg-white p-6">
-            <h1 className="text-2xl font-bold">ডাক্তারের প্রোফাইল</h1>
-            <p role="alert" className="mt-4">{error}</p>
+          <section className="mt-5 rounded-2xl bg-[#f7f9f8] p-5">
+            <h1 className="text-xl font-bold">ডাক্তারের প্রোফাইল</h1>
+            <p role="alert" className="mt-3">{error}</p>
 
             <button
               type="button"
               onClick={() => setRetry((value) => value + 1)}
-              className="mt-5 rounded-xl bg-[#16735d] px-5 py-3 text-white"
+              className="mt-4 rounded-xl bg-[#16735d] px-5 py-3 text-white"
             >
               আবার চেষ্টা করুন
             </button>
           </section>
         ) : doctor ? (
           <>
-            <header className="mt-6 rounded-3xl bg-[#e2eddd] p-7 sm:p-9">
-              <p className="text-sm font-semibold tracking-widest">
-                DOCLY
-              </p>
-<div className="mt-5">
-  <DoctorPhoto
-    src={doctor.photoUrl}
-    name={doctor.name}
-    size={128}
-  />
-</div>
-              <h1 className="mt-3 text-3xl font-bold leading-relaxed">
-                {doctor.name}
-              </h1>
+            <section className="flex items-start gap-4 py-5">
+              <DoctorPhoto
+                src={doctor.photoUrl}
+                name={doctor.name}
+                size={80}
+              />
 
-              <p className="mt-3 text-lg font-medium text-[#16735d]">
-                {doctor.specialty}
-              </p>
+              <div className="min-w-0 flex-1">
+                <h1 className="break-words text-xl font-bold leading-7 sm:text-2xl">
+                  {doctor.name}
+                </h1>
 
-              {doctor.qualifications && (
-                <p className="mt-3">{doctor.qualifications}</p>
-              )}
-            </header>
+                <p className="mt-2 text-sm font-semibold text-[#16735d]">
+                  {doctor.specialty}
+                </p>
 
-            <div className="mt-5">
-  <SaveDoctorButton doctorId={id} />
-</div>
+                {doctor.qualifications && (
+                  <p className="mt-2 break-words text-sm leading-6 text-[#66766e]">
+                    {doctor.qualifications}
+                  </p>
+                )}
 
-            <section className="mt-6 rounded-2xl border border-[#dce5d9] bg-white p-6">
-              <h2 className="text-xl font-bold">ডাক্তার সম্পর্কে</h2>
-
-              <dl className="mt-5 space-y-5">
-                <div>
-                  <dt className="text-sm">কর্মস্থল</dt>
-                  <dd className="mt-1">
-                    {doctor.workplace || "তথ্য দেওয়া হয়নি"}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm">BMDC নিবন্ধন নম্বর</dt>
-                  <dd className="mt-1">
-                    {doctor.bmdcNumber || "তথ্য দেওয়া হয়নি"}
-                  </dd>
-                </div>
-              </dl>
+                {doctor.workplace && (
+                  <p className="mt-2 break-words text-sm leading-6">
+                    {doctor.workplace}
+                  </p>
+                )}
+              </div>
             </section>
 
-            <section className="mt-8">
-              <h2 className="text-2xl font-bold">চেম্বার ও সিরিয়াল</h2>
+            <section className="border-t border-[#edf1ee] pt-5">
+              <h2 className="text-lg font-bold">চেম্বার ও সিরিয়াল</h2>
 
               {(doctor.chambers || []).length === 0 ? (
-                <p className="mt-4 rounded-2xl bg-white p-6">
+                <p className="mt-4 text-[#66766e]">
                   চেম্বারের তথ্য দেওয়া হয়নি।
                 </p>
               ) : (
-                <div className="mt-5 grid gap-5 md:grid-cols-2">
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {doctor.chambers.map((chamber, index) => {
                     const phoneLink = getPhoneLink(chamber.phone);
+                    const mapLink = getMapLink(chamber);
 
                     return (
                       <article
                         key={`${id}-${index}`}
-                        className="rounded-2xl border border-[#dce5d9] bg-white p-6"
+                        className="min-w-0 rounded-2xl border border-[#e4eae7] p-4"
                       >
-                        <h3 className="text-xl font-bold">{chamber.name}</h3>
+                        <h3 className="break-words text-lg font-semibold">
+                          {chamber.name}
+                        </h3>
 
-                        <p className="mt-3 font-medium text-[#16735d]">
+                        <p className="mt-2 text-sm font-medium text-[#16735d]">
                           {[chamber.area, chamber.district]
                             .filter(Boolean)
                             .join(", ")}
                         </p>
 
                         {chamber.address && (
-                          <p className="mt-3 leading-7">{chamber.address}</p>
+                          <p className="mt-2 break-words text-sm leading-6 text-[#66766e]">
+                            {chamber.address}
+                          </p>
                         )}
 
-                        <dl className="mt-5 space-y-5">
+                        <dl className="mt-4 space-y-3 border-t border-[#edf1ee] pt-4">
                           <div>
-                            <dt className="text-sm">রোগী দেখার দিন ও সময়</dt>
-                            <dd className="mt-1 leading-7">
+                            <dt className="text-sm text-[#66766e]">
+                              রোগী দেখার সময়
+                            </dt>
+                            <dd className="mt-1 break-words leading-7">
                               {chamber.schedule || "তথ্য দেওয়া হয়নি"}
                             </dd>
                           </div>
 
-                          <div>
-                            <dt className="text-sm">ভিজিট ফি</dt>
-                            <dd className="mt-1">
+                          <div className="flex flex-wrap justify-between gap-2">
+                            <dt className="text-sm text-[#66766e]">
+                              ভিজিট ফি
+                            </dt>
+                            <dd className="font-semibold">
                               {chamber.fee === null ||
                               chamber.fee === undefined ||
                               chamber.fee === ""
@@ -200,21 +292,40 @@ function DoctorProfileContent() {
                           </div>
 
                           <div>
-                            <dt className="text-sm">সিরিয়ালের ফোন নম্বর</dt>
+                            <dt className="text-sm text-[#66766e]">
+                              সিরিয়ালের নম্বর
+                            </dt>
                             <dd className="mt-1 break-words">
                               {chamber.phone || "তথ্য দেওয়া হয়নি"}
                             </dd>
                           </div>
                         </dl>
-<ChamberMapLink chamber={chamber} />
-                        {phoneLink && (
-                          <a
-                            href={phoneLink}
-                            className="mt-6 inline-block rounded-xl bg-[#16735d] px-5 py-3 text-white"
-                          >
-                            সিরিয়ালের জন্য কল করুন
-                          </a>
-                        )}
+
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                          {phoneLink ? (
+                            <a
+                              href={phoneLink}
+                              className="flex min-h-12 items-center justify-center rounded-xl bg-[#16735d] px-3 py-3 text-sm font-semibold text-white"
+                            >
+                              কল করুন
+                            </a>
+                          ) : (
+                            <span className="flex min-h-12 items-center justify-center rounded-xl bg-[#f2f5f3] px-3 text-sm text-[#66766e]">
+                              নম্বর দেওয়া নেই
+                            </span>
+                          )}
+
+                          {mapLink && (
+                            <a
+                              href={mapLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex min-h-12 items-center justify-center rounded-xl border border-[#16735d] px-3 py-3 text-sm font-semibold text-[#16735d]"
+                            >
+                              ম্যাপে খুঁজুন
+                            </a>
+                          )}
+                        </div>
                       </article>
                     );
                   })}
@@ -222,11 +333,31 @@ function DoctorProfileContent() {
               )}
             </section>
 
-            <p className="mt-7 rounded-2xl bg-[#e2eddd] p-5 text-sm leading-7">
-              সময় ও ফি পরিবর্তন হতে পারে। যাওয়ার আগে চেম্বারে যোগাযোগ
-              করে নিশ্চিত করুন। কল বাটন চাপলে ফোন করার ব্যবস্থা খুলবে;
-              এতে অ্যাপয়েন্টমেন্ট নিশ্চিত হবে না।
+            <p className="mt-5 rounded-xl bg-[#f7f9f8] p-4 text-sm leading-6 text-[#66766e]">
+              যাওয়ার আগে সময়, ফি ও অবস্থান চেম্বারে নিশ্চিত করুন।
+              কল করলে অ্যাপয়েন্টমেন্ট নিজে থেকে নিশ্চিত হয় না।
             </p>
+
+            <details className="mt-5 border-t border-[#edf1ee] py-4">
+              <summary className="cursor-pointer font-medium">
+                আরও তথ্য
+              </summary>
+
+              <p className="mt-3 text-sm leading-7">
+                BMDC নম্বর: {doctor.bmdcNumber || "তথ্য দেওয়া হয়নি"}
+              </p>
+
+              <p className="mt-2 text-sm leading-7 text-[#66766e]">
+                সেভ করা তালিকা এই ব্রাউজারেই থাকে।
+              </p>
+
+              <Link
+                href="/contact"
+                className="mt-3 inline-block text-sm text-[#16735d] underline"
+              >
+                ভুল তথ্য জানান
+              </Link>
+            </details>
           </>
         ) : null}
       </div>

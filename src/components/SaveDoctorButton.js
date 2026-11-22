@@ -22,7 +22,7 @@ function readSavedIds() {
   return [...new Set(value)];
 }
 
-export default function SaveDoctorButton({ doctorId }) {
+export default function SaveDoctorButton({ doctorId, compact = false }) {
   const [saved, setSaved] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
@@ -89,15 +89,17 @@ export default function SaveDoctorButton({ doctorId }) {
         }`}
       >
         {!ready
-          ? "অপেক্ষা করুন…"
-          : saved
-          ? "সেভ করা আছে — সরান"
-          : "ডাক্তার সেভ করুন"}
+  ? "অপেক্ষা…"
+  : saved
+  ? compact ? "সেভ করা আছে" : "সেভ করা আছে — সরান"
+  : compact ? "সেভ করুন" : "ডাক্তার সেভ করুন"}
       </button>
 
-      <p className="mt-2 text-sm">
-        এই ব্রাউজারে সেভ থাকবে। ব্রাউজারের তথ্য মুছলে তালিকাও মুছে যাবে।
-      </p>
+      {!compact && (
+  <p className="mt-2 text-sm">
+    এই ব্রাউজারে সেভ থাকবে। ব্রাউজারের তথ্য মুছলে তালিকাও মুছে যাবে।
+  </p>
+)}
 
       {error && (
         <p role="alert" className="mt-2 text-sm text-red-700">

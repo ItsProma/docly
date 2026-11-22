@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   collection,
@@ -22,9 +23,9 @@ const specialties = [
 
 export default function HomePage() {
   const [district, setDistrict] = useState("সিলেট");
-  const [doctors, setDoctors] = useState([]);
-  const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("");
+  const [search, setSearch] = useState("");
+  const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
@@ -56,14 +57,10 @@ export default function HomePage() {
           );
         }
       } catch (err) {
-        console.error("Docly: doctors query failed", err);
+        console.error("Docly doctors query failed", err);
 
         if (active) {
-          setError(
-            process.env.NODE_ENV === "development"
-              ? `${err.code || "unknown"}: ${err.message}`
-              : "ডাক্তারদের তালিকা আনা যায়নি। আবার চেষ্টা করুন।"
-          );
+          setError("ডাক্তারদের তালিকা আনা যায়নি। আবার চেষ্টা করুন।");
         }
       } finally {
         if (active) setLoading(false);
@@ -78,15 +75,15 @@ export default function HomePage() {
   }, [district, retry]);
 
   const filteredDoctors = doctors.filter((doctor) => {
-    const localChambers = (doctor.chambers || []).filter(
+    const chambers = (doctor.chambers || []).filter(
       (chamber) => chamber.district === district
     );
 
-    const searchableText = [
+    const text = [
       doctor.name,
       doctor.specialty,
       doctor.qualifications,
-      ...localChambers.flatMap((chamber) => [
+      ...chambers.flatMap((chamber) => [
         chamber.name,
         chamber.area,
       ]),
@@ -97,86 +94,63 @@ export default function HomePage() {
 
     return (
       (!specialty || doctor.specialty === specialty) &&
-      searchableText.includes(search.trim().toLocaleLowerCase())
+      text.includes(search.trim().toLocaleLowerCase())
     );
   });
 
+  const hasFilters = Boolean(search || specialty);
+
+  function clearFilters() {
+    setSearch("");
+    setSpecialty("");
+  }
+
   return (
-    <main className="min-h-screen bg-[#f3f7f2] text-[#234737]">
-      <div className="mx-auto max-w-6xl px-5 pb-12 sm:px-8">
-        <header className="flex items-center justify-between py-6">
-          <div className="flex items-center gap-2">
+    <main className="min-h-screen bg-white text-[#203c30]">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        <header className="flex items-center justify-between border-b border-[#edf1ee] py-4">
+          <Link href="/" className="flex items-center gap-2">
             <span
               aria-hidden="true"
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#16735d] text-3xl text-white"
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#16735d] text-2xl text-white"
             >
               +
             </span>
 
-            <span className="text-3xl font-bold tracking-tight">
+            <span className="text-2xl font-bold tracking-tight">
               Docly
             </span>
-          </div>
+          </Link>
 
-          <p className="text-sm">
-            নির্বাচিত জেলা<br />
-            <strong>{district}</strong>
+          <nav
+            aria-label="ডেস্কটপ নেভিগেশন"
+            className="hidden items-center gap-5 text-sm md:flex"
+          >
+            <Link href="/saved" className="hover:underline">
+              সেভ করা
+            </Link>
+            <Link href="/profile" className="hover:underline">
+              প্রোফাইল
+            </Link>
+          </nav>
+
+          <p className="text-sm text-[#66766e] md:hidden">
+            ডাক্তার খুঁজুন
           </p>
         </header>
 
-        <section className="relative overflow-hidden rounded-3xl bg-[#e2eddd] p-7 sm:p-10">
-          <p className="text-sm font-semibold tracking-widest text-[#526a48]">
-            CARE, CLOSER TO YOU
-          </p>
+        <section aria-label="ডাক্তার খুঁজুন" className="py-5">
+          <h1 className="text-xl font-bold">কোথায় ডাক্তার খুঁজছেন?</h1>
 
-          <h1 className="relative z-10 mt-4 text-3xl font-bold leading-relaxed sm:text-4xl">
-            সঠিক ডাক্তার খুঁজুন,
-            <br />
-            আপনার কাছেই।
-          </h1>
-
-          <p className="relative z-10 mt-4 max-w-lg leading-8">
-            আপনার জেলার ডাক্তার, চেম্বার ও রোগী দেখার তথ্য
-            খুঁজুন এক জায়গায়।
-          </p>
-
-          <p className="mt-5 inline-block rounded-lg bg-white px-3 py-2 text-sm">
-            বাংলাদেশের ৬৪টি জেলা নির্বাচন করুন
-          </p>
-        </section>
-<div className="mt-5">
-  <a
-    href="/saved"
-    className="inline-block rounded-xl border border-[#16735d] bg-white px-5 py-3 text-[#16735d]"
-  >
-    সেভ করা ডাক্তার
-  </a>
-</div>
-        <section aria-label="ডাক্তার খোঁজার ফিল্টার" className="mt-7">
-          <label className="block">
-            <span className="font-medium">
-              ডাক্তার, চেম্বার বা এলাকা দিয়ে খুঁজুন
-            </span>
-
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="নাম বা এলাকা লিখুন…"
-              className={inputClass}
-            />
-          </label>
-
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <label>
-              <span>জেলা</span>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <label className="min-w-0">
+              <span className="text-sm font-medium">জেলা</span>
 
               <select
                 value={district}
                 onChange={(event) => {
                   setDistrict(event.target.value);
-                  setSearch("");
-                  setSpecialty("");
+                  clearFilters();
                 }}
                 className={inputClass}
               >
@@ -190,8 +164,8 @@ export default function HomePage() {
               </select>
             </label>
 
-            <label>
-              <span>বিশেষজ্ঞতা</span>
+            <label className="min-w-0">
+              <span className="text-sm font-medium">বিশেষজ্ঞতা</span>
 
               <select
                 value={specialty}
@@ -206,59 +180,49 @@ export default function HomePage() {
               </select>
             </label>
           </div>
+
+          <label className="mt-3 block">
+            <span className="sr-only">
+              ডাক্তারের নাম, চেম্বার বা এলাকা দিয়ে খুঁজুন
+            </span>
+
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="ডাক্তারের নাম, চেম্বার বা এলাকা…"
+              className={inputClass}
+            />
+          </label>
         </section>
 
-        <section className="mt-8">
-          <h2 className="text-xl font-bold">কোন বিশেষজ্ঞ খুঁজছেন?</h2>
-
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {["মেডিসিন", "শিশু", "গাইনি ও প্রসূতি", "চর্ম ও যৌন"].map(
-              (item) => (
-                <button
-                  key={item}
-                  type="button"
-                  aria-pressed={specialty === item}
-                  onClick={() =>
-                    setSpecialty(specialty === item ? "" : item)
-                  }
-                  className={`rounded-2xl border p-4 ${
-                    specialty === item
-                      ? "border-[#16735d] bg-[#16735d] text-white"
-                      : "border-[#dce5d9] bg-white"
-                  }`}
-                >
-                  {item}
-                </button>
-              )
-            )}
-          </div>
-        </section>
-
-        <section className="mt-9" aria-label="ডাক্তারদের তালিকা">
+        <section
+          aria-label="ডাক্তারদের তালিকা"
+          className="border-t border-[#edf1ee] pt-5"
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-lg font-semibold">
               {district} জেলার ডাক্তার
             </h2>
 
-            <button
-              type="button"
-              onClick={() => {
-                setSearch("");
-                setSpecialty("");
-              }}
-              className="text-[#16735d] underline"
-            >
-              ফিল্টার মুছুন
-            </button>
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="min-h-11 px-2 text-sm text-[#16735d] underline"
+              >
+                ফিল্টার মুছুন
+              </button>
+            )}
           </div>
 
           {loading ? (
-            <p role="status" className="mt-5">ডাক্তারদের তথ্য আসছে…</p>
+            <p role="status" className="py-8 text-[#66766e]">
+              ডাক্তারদের তালিকা আসছে…
+            </p>
           ) : error ? (
-            <div className="mt-5 rounded-2xl bg-white p-5">
-              <p role="alert" className="break-words text-red-700">
-                {error}
-              </p>
+            <div className="my-5 rounded-2xl bg-[#f7f9f8] p-5">
+              <p role="alert">{error}</p>
 
               <button
                 type="button"
@@ -270,112 +234,141 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              <p className="mt-3 text-sm">
-                এই তালিকায় পাওয়া গেছে {filteredDoctors.length}টি প্রোফাইল।
-                প্রতি জেলায় সর্বোচ্চ ৫০টি লোড হচ্ছে।
+              <p role="status" className="mt-2 text-sm text-[#66766e]">
+                পাওয়া গেছে {filteredDoctors.length}টি প্রোফাইল
               </p>
 
               {filteredDoctors.length === 0 ? (
-                <p className="mt-5 rounded-2xl border border-[#dce5d9] bg-white p-6">
-                  {doctors.length === 0
-                    ? "এই জেলায় ডাক্তারের তথ্য এখনো যোগ করা হয়নি।"
-                    : "এই ফিল্টারে কোনো ডাক্তার পাওয়া যায়নি।"}
-                </p>
+                <div className="my-5 rounded-2xl border border-[#e4eae7] bg-[#f7f9f8] p-5">
+                  <h3 className="font-semibold">
+                    {doctors.length === 0
+                      ? "এই জেলায় তথ্য এখনো যোগ করা হয়নি"
+                      : "এই সার্চে ডাক্তার পাওয়া যায়নি"}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-7 text-[#66766e]">
+                    {doctors.length === 0
+                      ? "অন্য জেলা নির্বাচন করে দেখতে পারেন।"
+                      : "নাম বা এলাকা বদলে খুঁজুন, অথবা ফিল্টার মুছুন।"}
+                  </p>
+                </div>
               ) : (
-                <div className="mt-5 grid gap-5 lg:grid-cols-2">
-                  {filteredDoctors.map((doctor) => (
-                    <article
-                      key={doctor.id}
-                      className="rounded-2xl border border-[#dce5d9] bg-white p-6"
-                    >
-                      <div className="mb-4">
-  <DoctorPhoto
-    src={doctor.photoUrl}
-    name={doctor.name}
-  />
-</div>
-                      <h3 className="text-xl font-bold">
-  <a
-    href={`/doctors/${doctor.id}`}
-    className="underline decoration-[#b9cbb6] underline-offset-4 hover:text-[#16735d]"
-  >
-    {doctor.name}
-  </a>
-</h3>
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  {filteredDoctors.map((doctor) => {
+                    const chambers = (doctor.chambers || []).filter(
+                      (chamber) => chamber.district === district
+                    );
 
-                      <p className="mt-2 font-medium text-[#16735d]">
-                        {doctor.specialty}
-                      </p>
+                    const firstChamber = chambers[0];
+                    const profileUrl =
+                      `/doctors/${encodeURIComponent(doctor.id)}`;
 
-                      {doctor.qualifications && (
-                        <p className="mt-2">{doctor.qualifications}</p>
-                      )}
+                    return (
+                      <article
+                        key={doctor.id}
+                        className="min-w-0 rounded-2xl border border-[#e4eae7] p-4"
+                      >
+                        <div className="flex items-start gap-3">
+                          <DoctorPhoto
+                            src={doctor.photoUrl}
+                            name={doctor.name}
+                            size={64}
+                          />
 
-                      {doctor.workplace && (
-                        <p className="mt-2">{doctor.workplace}</p>
-                      )}
+                          <div className="min-w-0 flex-1">
+                            <h3 className="break-words text-lg font-semibold leading-7">
+                              <Link
+                                href={profileUrl}
+                                className="hover:text-[#16735d] hover:underline"
+                              >
+                                {doctor.name}
+                              </Link>
+                            </h3>
 
-                      {(doctor.chambers || [])
-                        .filter((chamber) => chamber.district === district)
-                        .map((chamber, index) => (
-                          <div
-                            key={`${doctor.id}-${index}`}
-                            className="mt-5 border-t border-[#dce5d9] pt-4"
-                          >
-                            <h4 className="font-semibold">{chamber.name}</h4>
+                            <p className="mt-1 text-sm font-medium text-[#16735d]">
+                              {doctor.specialty}
+                            </p>
 
-                            <p className="mt-2">
-                              {[chamber.area, chamber.district]
+                            {doctor.qualifications && (
+                              <p className="mt-1 break-words text-sm leading-6 text-[#66766e]">
+                                {doctor.qualifications}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {firstChamber && (
+                          <div className="mt-4 border-t border-[#edf1ee] pt-3">
+                            <p className="break-words text-sm font-medium">
+                              {firstChamber.name}
+                            </p>
+
+                            <p className="mt-1 text-sm text-[#66766e]">
+                              {[firstChamber.area, firstChamber.district]
                                 .filter(Boolean)
                                 .join(", ")}
                             </p>
 
-                            {chamber.schedule && (
-                              <p className="mt-2">{chamber.schedule}</p>
+                            {firstChamber.schedule && (
+                              <p className="mt-2 break-words text-sm leading-6">
+                                {firstChamber.schedule}
+                              </p>
                             )}
 
-                            <p className="mt-2">
-                              ভিজিট ফি:{" "}
-                              {chamber.fee === null ||
-                              chamber.fee === undefined ||
-                              chamber.fee === ""
-                                ? "তথ্য দেওয়া হয়নি"
-                                : `৳ ${chamber.fee}`}
-                            </p>
+                            {firstChamber.fee !== null &&
+                              firstChamber.fee !== undefined &&
+                              firstChamber.fee !== "" && (
+                                <p className="mt-2 text-sm">
+                                  ভিজিট: ৳ {firstChamber.fee}
+                                </p>
+                              )}
+
+                            {chambers.length > 1 && (
+                              <p className="mt-2 text-sm text-[#66766e]">
+                                এই জেলায় আরও {chambers.length - 1}টি চেম্বার
+                              </p>
+                            )}
                           </div>
-                        ))}
-                    </article>
-                  ))}
+                        )}
+
+                        <Link
+                          href={profileUrl}
+                          className="mt-4 flex min-h-11 items-center justify-center rounded-xl bg-[#edf6f1] px-4 py-3 text-sm font-semibold text-[#16735d] hover:bg-[#e0f0e7]"
+                        >
+                          প্রোফাইল ও সিরিয়ালের তথ্য
+                        </Link>
+                      </article>
+                    );
+                  })}
                 </div>
+              )}
+
+              {doctors.length === 50 && (
+                <p className="mt-4 text-sm leading-6 text-[#66766e]">
+                  আপাতত প্রথম ৫০টি প্রোফাইল দেখানো হচ্ছে।
+                  সার্চ এই তালিকার মধ্যে কাজ করে।
+                </p>
               )}
             </>
           )}
         </section>
 
-        <footer className="mt-10 border-t border-[#dce5d9] pt-5 text-sm leading-7">
-          <p>
-            চেম্বারের সময় ও ভিজিট ফি পরিবর্তন হতে পারে।
-            যাওয়ার আগে চেম্বারে যোগাযোগ করে নিশ্চিত করুন।
+        <footer className="mt-8 border-t border-[#edf1ee] py-5 text-sm text-[#66766e]">
+          <p className="leading-6">
+            যাওয়ার আগে চেম্বারে যোগাযোগ করে সময় ও ফি নিশ্চিত করুন।
           </p>
-          <p className="mt-2">Docly · Deb Creatives</p>
-          <a
-  href="/privacy"
-  className="mr-5 mt-3 inline-block text-[#16735d] underline"
->
-  গোপনীয়তা নীতি
-</a>
-          <a
-  href="/about"
-  className="mr-5 mt-3 inline-block text-[#16735d] underline"
->
-  আমাদের সম্পর্কে
-</a>
-          <a
-  href="/contact"
-  className="mt-3 inline-block text-[#16735d] underline"
->
-  যোগাযোগ ও তথ্য সংশোধন
-</a>
+
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-3">
+            <Link href="/about" className="hover:underline">
+              আমাদের সম্পর্কে
+            </Link>
+            <Link href="/contact" className="hover:underline">
+              যোগাযোগ
+            </Link>
+            <Link href="/privacy" className="hover:underline">
+              গোপনীয়তা
+            </Link>
+          </div>
         </footer>
       </div>
     </main>
@@ -383,4 +376,4 @@ export default function HomePage() {
 }
 
 const inputClass =
-  "mt-2 block w-full rounded-xl border border-[#b9cbb6] bg-white p-3 text-base text-[#234737] focus:outline-2 focus:outline-[#16735d]";
+  "mt-2 block min-h-12 w-full min-w-0 rounded-xl border border-[#d7e1db] bg-[#f7f9f8] px-3 py-3 text-base text-[#203c30] focus:outline-2 focus:outline-[#16735d]";
