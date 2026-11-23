@@ -66,5 +66,23 @@ const specialtyLabels = {
 };
 
 export function getSpecialtyLabel(value) {
-  return specialtyLabels[value] || value;
+  if (specialtyLabels[value]) {
+    return specialtyLabels[value];
+  }
+
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  const parts = value.split(/\s+[–—]\s+/);
+
+  if (
+    parts.length === 2 &&
+    /^[A-Za-z]/.test(parts[0]) &&
+    /[\u0980-\u09FF]/.test(parts[1])
+  ) {
+    return `${parts[1]} — ${parts[0]}`;
+  }
+
+  return value;
 }
