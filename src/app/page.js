@@ -12,7 +12,7 @@ import {
 import { db } from "@/lib/firebase";
 import { districtGroups } from "@/lib/locations";
 import DoctorPhoto from "@/components/DoctorPhoto";
-import { specialties } from "@/lib/specialties";
+import { specialties, getSpecialtyLabel } from "@/lib/specialties";
 
 
 
@@ -170,8 +170,10 @@ export default function HomePage() {
                 <option value="">সব বিশেষজ্ঞ</option>
 
                 {specialties.map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
+  <option key={item} value={item}>
+    {getSpecialtyLabel(item)}
+  </option>
+))}
               </select>
             </label>
           </div>

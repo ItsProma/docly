@@ -42,3 +42,29 @@ export const specialties = [
 
   "অন্যান্য",
 ];
+const specialtyLabels = {
+  "মেডিসিন": "মেডিসিন — Medicine",
+  "শিশু": "শিশু — Pediatrics",
+  "গাইনি ও প্রসূতি": "গাইনি ও প্রসূতি — Gynecology & Obstetrics",
+  "চর্ম ও যৌন": "চর্ম ও যৌন — Dermatology & Venereology",
+  "হৃদরোগ": "হৃদরোগ — Cardiology",
+  "নিউরোলজি": "নিউরোলজি — Neurology",
+  "অর্থোপেডিক্স": "অর্থোপেডিক্স — Orthopedics",
+  "নাক-কান-গলা": "নাক-কান-গলা — ENT (Otolaryngology)",
+  "চক্ষু": "চক্ষু — Ophthalmology",
+  "দন্ত": "দন্ত — Dentistry",
+  "সার্জারি": "সার্জারি — Surgery",
+  "কিডনি": "কিডনি — Nephrology",
+  "ইউরোলজি": "ইউরোলজি — Urology",
+  "ডায়াবেটিস ও হরমোন":
+    "ডায়াবেটিস ও হরমোন — Diabetology & Endocrinology",
+  "মানসিক স্বাস্থ্য": "মানসিক স্বাস্থ্য — Mental Health (Psychiatry)",
+  "বক্ষব্যাধি": "বক্ষব্যাধি — Respiratory Medicine (Pulmonology)",
+  "গ্যাস্ট্রোএন্টারোলজি": "গ্যাস্ট্রোএন্টারোলজি — Gastroenterology",
+  "ক্যান্সার": "ক্যান্সার — Oncology",
+  "অন্যান্য": "অন্যান্য — Other",
+};
+
+export function getSpecialtyLabel(value) {
+  return specialtyLabels[value] || value;
+}
