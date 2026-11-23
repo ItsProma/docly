@@ -122,11 +122,9 @@ export default function SavedDoctorsPage() {
   return (
     <main className="min-h-screen bg-[#f3f7f2] px-5 py-8 text-[#234737]">
       <div className="mx-auto max-w-4xl">
-        <a href="/" className="text-[#16735d] underline">
-          হোমে ফিরুন
-        </a>
+        
 
-        <h1 className="mt-6 text-3xl font-bold">
+        <h1 className="text-3xl font-bold">
           সেভ করা ডাক্তার
         </h1>
 
