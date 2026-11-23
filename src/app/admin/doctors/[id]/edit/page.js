@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import { specialties } from "@/lib/specialties";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   doc,
@@ -14,13 +15,7 @@ import DoctorPhotoUploader from "@/components/DoctorPhotoUploader";
 
 const ADMIN_UID = "t40iJNgKPdVcppcEqZJk4BoUbL02";
 
-const specialties = [
-  "মেডিসিন", "শিশু", "গাইনি ও প্রসূতি", "চর্ম ও যৌন",
-  "হৃদরোগ", "নিউরোলজি", "অর্থোপেডিক্স", "নাক-কান-গলা",
-  "চক্ষু", "দন্ত", "সার্জারি", "কিডনি", "ইউরোলজি",
-  "ডায়াবেটিস ও হরমোন", "মানসিক স্বাস্থ্য", "বক্ষব্যাধি",
-  "গ্যাস্ট্রোএন্টারোলজি", "ক্যান্সার", "অন্যান্য",
-];
+
 
 export default function EditDoctorPage() {
   return (

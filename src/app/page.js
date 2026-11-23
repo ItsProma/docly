@@ -12,14 +12,9 @@ import {
 import { db } from "@/lib/firebase";
 import { districtGroups } from "@/lib/locations";
 import DoctorPhoto from "@/components/DoctorPhoto";
+import { specialties } from "@/lib/specialties";
 
-const specialties = [
-  "মেডিসিন", "শিশু", "গাইনি ও প্রসূতি", "চর্ম ও যৌন",
-  "হৃদরোগ", "নিউরোলজি", "অর্থোপেডিক্স", "নাক-কান-গলা",
-  "চক্ষু", "দন্ত", "সার্জারি", "কিডনি", "ইউরোলজি",
-  "ডায়াবেটিস ও হরমোন", "মানসিক স্বাস্থ্য", "বক্ষব্যাধি",
-  "গ্যাস্ট্রোএন্টারোলজি", "ক্যান্সার", "অন্যান্য",
-];
+
 
 export default function HomePage() {
   const [district, setDistrict] = useState("সিলেট");

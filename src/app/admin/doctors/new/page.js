@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import { specialties } from "@/lib/specialties";
 
 const ADMIN_UID = "t40iJNgKPdVcppcEqZJk4BoUbL02";
 
@@ -37,13 +38,7 @@ const districtGroups = {
   ময়মনসিংহ: ["জামালপুর", "ময়মনসিংহ", "নেত্রকোণা", "শেরপুর"],
 };
 
-const specialties = [
-  "মেডিসিন", "শিশু", "গাইনি ও প্রসূতি", "চর্ম ও যৌন",
-  "হৃদরোগ", "নিউরোলজি", "অর্থোপেডিক্স", "নাক-কান-গলা",
-  "চক্ষু", "দন্ত", "সার্জারি", "কিডনি", "ইউরোলজি",
-  "ডায়াবেটিস ও হরমোন", "মানসিক স্বাস্থ্য", "বক্ষব্যাধি",
-  "গ্যাস্ট্রোএন্টারোলজি", "ক্যান্সার", "অন্যান্য",
-];
+
 
 export default function NewDoctorPage() {
   const [access, setAccess] = useState("checking");
