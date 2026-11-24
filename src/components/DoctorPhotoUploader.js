@@ -14,7 +14,8 @@ import {
   runTransaction,
   serverTimestamp,
 } from "firebase/firestore";
-import { auth, db, storage } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-auth";
 
 const ADMIN_UID = "t40iJNgKPdVcppcEqZJk4BoUbL02";
 const MAX_BYTES = 2 * 1024 * 1024;

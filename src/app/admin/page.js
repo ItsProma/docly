@@ -6,7 +6,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-auth";
 
 const ADMIN_UID = "t40iJNgKPdVcppcEqZJk4BoUbL02";
 

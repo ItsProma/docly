@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-auth";
 import { specialties } from "@/lib/specialties";
 
 const ADMIN_UID = "t40iJNgKPdVcppcEqZJk4BoUbL02";

@@ -8,7 +8,8 @@ import {
   limit,
   query,
 } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase-auth";
 
 const ADMIN_UID = "t40iJNgKPdVcppcEqZJk4BoUbL02";
 
