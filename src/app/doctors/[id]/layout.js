@@ -32,8 +32,8 @@ export async function generateMetadata({ params }) {
     const specialty = doctor.specialty || "ডাক্তার";
 
     return {
-      title: `${name} | ${specialty} in ${district}`,
-      description: `${name} — ${district}-এ ${specialty}. যোগ্যতা, চেম্বারের ঠিকানা, রোগী দেখার সময় ও সিরিয়ালের তথ্য Docly-তে দেখুন।`,
+      title: `${name} | ${specialty} | ${district}`,
+description: `${name}. বিশেষজ্ঞতা: ${specialty}। জেলা: ${district}, বাংলাদেশ। যোগ্যতা, চেম্বারের ঠিকানা, রোগী দেখার সময় ও সিরিয়ালের তথ্য Docly-তে দেখুন।`,
     };
   } catch (error) {
     console.error("Doctor metadata could not be loaded:", error);
