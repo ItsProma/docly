@@ -15,9 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Docly — আপনার এলাকায় ডাক্তার খুঁজুন",
- description:
-  "বাংলাদেশের বিভিন্ন জেলার ডাক্তার, বিশেষজ্ঞতা, চেম্বারের ঠিকানা, রোগী দেখার সময় ও সিরিয়ালের তথ্য খুঁজুন Docly-তে।",
+  metadataBase: new URL("https://docly.debcreatives.net"),
+  title: {
+    default: "Doctors in Bangladesh | বাংলাদেশের ডাক্তার খুঁজুন | Docly",
+    template: "%s | Docly",
+  },
+  description:
+    "Find doctors and specialists across Bangladesh. বাংলাদেশের বিভিন্ন জেলার ডাক্তারদের বিশেষজ্ঞতা, চেম্বারের ঠিকানা, রোগী দেখার সময় ও সিরিয়ালের যোগাযোগের তথ্য খুঁজুন Docly-তে।",
 };
 
 export default function RootLayout({ children }) {
