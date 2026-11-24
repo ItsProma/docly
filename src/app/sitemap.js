@@ -15,9 +15,30 @@ export default async function sitemap() {
 
   const doctorsSnapshot = await getDocs(doctorsQuery);
 
-  const doctorPages = doctorsSnapshot.docs.map((doctor) => ({
+  const publishedDoctors = doctorsSnapshot.docs.map((doctor) => ({
+    id: doctor.id,
+    ...doctor.data(),
+  }));
+
+  const doctorPages = publishedDoctors.map((doctor) => ({
     url: `${siteUrl}/doctors/${doctor.id}`,
   }));
 
-  return [...staticPages, ...doctorPages];
+  const districts = [
+    ...new Set(
+      publishedDoctors.flatMap((doctor) =>
+        Array.isArray(doctor.chambers)
+          ? doctor.chambers
+              .map((chamber) => chamber?.district?.trim())
+              .filter(Boolean)
+          : []
+      )
+    ),
+  ];
+
+  const districtPages = districts.map((district) => ({
+    url: `${siteUrl}/district/${encodeURIComponent(district)}`,
+  }));
+
+  return [...staticPages, ...doctorPages, ...districtPages];
 }
