@@ -192,21 +192,7 @@ export default function HomePage() {
             />
           </label>
         </section>
-        <section
-  aria-labelledby="district-links-heading"
-  className="border-t border-[#edf1ee] py-5"
->
-  <h2 id="district-links-heading" className="text-lg font-semibold">
-    জেলা অনুযায়ী ডাক্তার খুঁজুন
-  </h2>
-
-  <Link
-    href={`/district/${encodeURIComponent("সিলেট")}`}
-    className="mt-3 inline-block rounded-xl border border-[#d7e1db] bg-white px-4 py-3 text-sm font-medium text-[#16735d] hover:bg-[#edf6f1]"
-  >
-    সিলেট জেলার ডাক্তার
-  </Link>
-</section>
+      
 
         <section
           aria-label="ডাক্তারদের তালিকা"
