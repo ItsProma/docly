@@ -135,7 +135,7 @@ export default function HomePage() {
         </header>
 
         <section aria-label="ডাক্তার খুঁজুন" className="py-5">
-          <h1 className="text-xl font-bold">কোথায় ডাক্তার খুঁজছেন?</h1>
+          <h1 className="text-xl font-bold">বাংলাদেশের ডাক্তার ও বিশেষজ্ঞ খুঁজুন</h1>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
             <label className="min-w-0">
