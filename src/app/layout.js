@@ -39,9 +39,10 @@ export default function RootLayout({ children }) {
 <Suspense
   fallback={
     <div
-      aria-hidden="true"
-      className="h-24 md:hidden"
-    />
+  aria-hidden="true"
+  className="md:hidden"
+  style={{ height: "calc(88px + env(safe-area-inset-bottom))" }}
+/>
   }
 >
   <BottomNav />
